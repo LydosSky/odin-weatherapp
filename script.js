@@ -1,9 +1,8 @@
-import MOCK_DATA from "./data.js";
-
 const API_KEY = "L65HRL2TSN56KX7HYS324LYP6";
 const API_URL = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/`;
+const searchBar = document.querySelector("#search-bar-form");
 
-let country = "london";
+let country;
 let unit = "metric";
 
 const WeatherData = function (description, currentConditions, days) {
@@ -108,10 +107,18 @@ const UI = (function () {
   return { drawCurrentWeather, drawForecast };
 })();
 
-// WeatherModule.getWeatherData(country, unit).then((weather) =>
-//   UI.drawCurrentWeather(weather.currentConditions, unit),
-// );
-console.log(MOCK_DATA);
+const EventHandlers = (function (country, weatherModule, uI) {
+  function handleInput(event) {
+    event.preventDefault();
+    const input = document.querySelector("#location");
+    country = input.value.toLowerCase();
+    weatherModule.getWeatherData(country, unit).then((weather) => {
+      uI.drawCurrentWeather(weather, unit);
+      uI.drawForecast(weather, unit);
+    });
+  }
 
-UI.drawCurrentWeather(MOCK_DATA, unit);
-UI.drawForecast(MOCK_DATA, unit);
+  return { handleInput };
+})(country, WeatherModule, UI);
+
+searchBar.addEventListener("submit", EventHandlers.handleInput);
