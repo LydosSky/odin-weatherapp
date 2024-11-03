@@ -39,12 +39,12 @@ const UI = (function () {
     const weatherCard = createWeatherCard(
       currentWeather.currentConditions,
       unit,
+      true,
     );
 
     currentWeatherContainer.appendChild(weatherCard);
   }
-
-  function createWeatherCard(currentWeather, unit) {
+  function createWeatherCard(currentWeather, unit, today = false) {
     let symbol;
     if (unit === "metric") symbol = "°C";
     if (unit === "us") symbol = "°F";
@@ -58,18 +58,22 @@ const UI = (function () {
     const humidity = document.createElement("small");
     const uvindex = document.createElement("small");
     const dewPoint = document.createElement("small");
+    const datetime = document.createElement("small");
 
     card.classList.add("card");
     cardLeftContainer.classList.add("card-left-container");
     cardRightContainer.classList.add("card-right-container");
 
-    h2.innerText = `${currentWeather.temp} ${symbol}`;
+    datetime.innerText = `${currentWeather.datetime}`;
+
+    h2.innerText = `${Math.floor(currentWeather.temp)} ${symbol}`;
     small.innerText = currentWeather.conditions;
     feelslike.innerText = `Feelslike: ${currentWeather.feelslike} ${symbol}`;
     humidity.innerText = `Humidity: ${currentWeather.humidity}%`;
     dewPoint.innerText = `Dew Point: ${currentWeather.dew}`;
     uvindex.innerText = `UV: ${currentWeather.uvindex}`;
 
+    cardLeftContainer.appendChild(datetime);
     cardLeftContainer.appendChild(h2);
     cardLeftContainer.appendChild(small);
     cardRightContainer.appendChild(feelslike);
@@ -79,11 +83,29 @@ const UI = (function () {
 
     card.appendChild(cardLeftContainer);
     card.appendChild(cardRightContainer);
+    if (today) {
+      datetime.innerText = "Today";
+    }
+
+    if (!today) {
+      cardRightContainer.classList.add("hidden-details");
+    }
 
     return card;
   }
 
-  return { drawCurrentWeather };
+  function drawForecast(weatherData, unit) {
+    const forecastContainer = document.querySelector("#weather-forecast");
+
+    function mapDay(day, index) {
+      const dayCard = createWeatherCard(day, unit);
+      if (index < 9) forecastContainer.appendChild(dayCard);
+    }
+
+    weatherData.days.map(mapDay);
+  }
+
+  return { drawCurrentWeather, drawForecast };
 })();
 
 // WeatherModule.getWeatherData(country, unit).then((weather) =>
@@ -92,3 +114,4 @@ const UI = (function () {
 console.log(MOCK_DATA);
 
 UI.drawCurrentWeather(MOCK_DATA, unit);
+UI.drawForecast(MOCK_DATA, unit);
